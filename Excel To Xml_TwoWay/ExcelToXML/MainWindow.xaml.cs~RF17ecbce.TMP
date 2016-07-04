@@ -1,0 +1,408 @@
+﻿using Microsoft.Win32;
+using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Data.OleDb;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Data;
+using System.Windows.Documents;
+using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using System.Windows.Navigation;
+using System.Windows.Shapes;
+using System.Xml;
+using System.Xml.Linq;
+using System.Xml.Serialization;
+
+namespace ExcelToXML
+{
+    /// <summary>
+    /// MainWindow.xaml 的互動邏輯
+    /// </summary>
+    public partial class MainWindow : Window
+    {
+
+
+        public MainWindow()
+        {
+            InitializeComponent();
+        }
+        //選擇Excel file
+        private void Button_Click_1(object sender, RoutedEventArgs e)
+        {
+            Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog();
+
+            dlg.DefaultExt = ".xlsx";
+            dlg.Filter = "(.xlsx)|*.xlsx";
+            Nullable<bool> result = dlg.ShowDialog();
+
+            // Get the selected file name and display in a TextBox
+            if (result == true)
+            {
+
+                txtFIle.Text = dlg.FileName;
+
+
+                List sheetNameList = new List();
+
+                System.Data.OleDb.OleDbConnection conn = GetConnect(txtFIle.Text);
+                conn.Open();
+
+                DataTable sheetList = conn.GetSchema("Tables");
+
+                cmbSheet.DisplayMemberPath = "TABLE_NAME";
+                cmbSheet.SelectedValuePath = "TABLE_NAME";
+                cmbSheet.ItemsSource = sheetList.DefaultView;
+            }
+        }
+        //產生XML文件
+        private void Button_Click_2(object sender, RoutedEventArgs e)
+        {
+            string tname = cmbSheet.SelectedValue.ToString().Replace("'", string.Empty);
+
+            DataTable line = GetExcelDataTable(txtFIle.Text, tname.Replace("$", string.Empty));
+
+            //DataTable line = GetExcelDataTable(txtFIle.Text, "20150423");
+
+            //寫入XML
+            string StartWord = string.Format("<ResourceDictionary xmlns='{0}' xmlns:x='{1}' xmlns:sys='{2}'>", "http://schemas.microsoft.com/winfx/2006/xaml/presentation", "http://schemas.microsoft.com/winfx/2006/xaml", "clr-namespace:System;assembly=mscorlib"); //開始字串
+            string ContentWord = "<sys:String x:Key='{0}'>{1}</sys:String>";
+            string EndWord = "</ResourceDictionary>";    //結束字串
+
+            string dir = "C:\\res";
+
+            if (!Directory.Exists(dir))
+                Directory.CreateDirectory(dir);
+
+            foreach (DataColumn cols in line.Columns)
+            {
+                if (cols.ColumnName != "var")
+                {
+                    FileStream fs = new FileStream(dir + "\\" + cols.ColumnName + ".xaml", FileMode.OpenOrCreate);
+                    StreamWriter swWriter = new StreamWriter(fs);
+                    //寫入數據
+                    swWriter.WriteLine(StartWord);
+
+                    for (int i = 0; i < line.Rows.Count; i++)
+                    {
+                        string ContentLine = string.Format(ContentWord, line.Rows[i]["var"].ToString(), line.Rows[i][cols.ColumnName].ToString());
+                        swWriter.WriteLine(ContentLine);
+                    }
+                    swWriter.WriteLine(EndWord);
+                    swWriter.Close();
+
+                }
+
+            }
+
+        }
+
+        //public DataRow GetExcelDataSheet()
+        //{
+        /// load excel sheet as DataRow
+        //DataRow[] sheetList =
+        //    GetConnect().GetSchema("Tables").Select();
+
+        //}
+
+        public System.Data.OleDb.OleDbConnection GetConnect(string path)
+        {
+            /*Office 2007*/
+            string ace = "Microsoft.ACE.OLEDB.12.0";
+            /*Office 97 - 2003*/
+            string jet = "Microsoft.Jet.OLEDB.4.0";
+            string xl2007 = "Excel 12.0 Xml";
+            string xl2003 = "Excel 8.0";
+            string imex = "IMEX=1";
+            /* csv */
+            string text = "text";
+            string fmt = "FMT=Delimited";
+            string hdr = "Yes";
+            string conn = "Provider={0};Data Source={1};Extended Properties=\"{2};HDR={3};{4}\";";
+            //string select = string.Format("SELECT * FROM [{0}$]", tname);
+            //string select = sql;
+            string ext = System.IO.Path.GetExtension(path);
+            System.Data.OleDb.OleDbDataAdapter oda;
+            DataTable dt = new DataTable("data");
+            switch (ext.ToLower())
+            {
+                case ".xlsx":
+                    conn = String.Format(conn, ace, System.IO.Path.GetFullPath(path), xl2007, hdr, imex);
+                    break;
+                case ".xls":
+                    conn = String.Format(conn, jet, System.IO.Path.GetFullPath(path), xl2003, hdr, imex);
+                    break;
+                case ".csv":
+                    conn = String.Format(conn, jet, System.IO.Path.GetDirectoryName(path), text, hdr, fmt);
+                    //sheet = Path.GetFileName(path);
+                    break;
+                case ".xaml":
+                    conn = String.Format(conn, jet, System.IO.Path.GetDirectoryName(path), text, hdr, fmt);
+                    //sheet = Path.GetFileName(path);
+                    break;
+                default:
+                    throw new Exception("File Not Supported!");
+            }
+            System.Data.OleDb.OleDbConnection con = new System.Data.OleDb.OleDbConnection(conn);
+
+            return con;
+        }
+
+        /// <summary>
+        /// 根據Xaml路徑和file名稱，返回xaml的DataTable
+        /// </summary>
+        /// <param name="path">Excel 檔路徑</param>
+        /// <param name="tname">Excel WorkSheet name</param>
+        /// <returns>Data Table</returns>
+        public DataTable GetExcelDataTable(string path, string tname)
+        {
+            /*Office 2007*/
+            string ace = "Microsoft.ACE.OLEDB.12.0";
+            /*Office 97 - 2003*/
+            string jet = "Microsoft.Jet.OLEDB.4.0";
+            string xl2007 = "Excel 12.0 Xml";
+            string xl2003 = "Excel 8.0";
+            string imex = "IMEX=1";
+            /* csv */
+            string text = "text";
+            string fmt = "FMT=Delimited";
+            string hdr = "Yes";
+            string conn = "Provider={0};Data Source={1};Extended Properties=\"{2};HDR={3};{4}\";";
+            string select = string.Format("SELECT * FROM [{0}$]", tname);
+            //string select = sql;
+            string ext = System.IO.Path.GetExtension(path);
+            System.Data.OleDb.OleDbDataAdapter oda;
+            DataTable dt = new DataTable("data");
+            switch (ext.ToLower())
+            {
+                case ".xlsx":
+                    conn = String.Format(conn, ace, System.IO.Path.GetFullPath(path), xl2007, hdr, imex);
+                    break;
+                case ".xls":
+                    conn = String.Format(conn, jet, System.IO.Path.GetFullPath(path), xl2003, hdr, imex);
+                    break;
+                case ".csv":
+                    conn = String.Format(conn, jet, System.IO.Path.GetDirectoryName(path), text, hdr, fmt);
+                    //sheet = Path.GetFileName(path);
+                    break;
+                default:
+                    throw new Exception("File Not Supported!");
+            }
+            System.Data.OleDb.OleDbConnection con = new System.Data.OleDb.OleDbConnection(conn);
+            con.Open();
+            //select = string.Format(select, sql);
+            oda = new System.Data.OleDb.OleDbDataAdapter(select, con);
+            oda.Fill(dt);
+            con.Close();
+            return dt;
+        }
+
+        #region XML To Excel
+
+        /// <summary>
+        /// slect xaml files,retune nameList
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void btnSelectXamlFile(object sender, RoutedEventArgs e)
+        {
+            OpenFileDialog chrooseFileDialog = new OpenFileDialog();
+            chrooseFileDialog.DefaultExt = ".xaml";
+            chrooseFileDialog.Filter = ".xaml|*.xaml";
+            chrooseFileDialog.Multiselect = true;
+            chrooseFileDialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+            Nullable<bool> result = chrooseFileDialog.ShowDialog();
+
+            try
+            {
+                if (result == true)
+                {
+                    List<string> xamlNameList = chrooseFileDialog.FileNames.ToList();
+                    if (xamlNameList != null)
+                    {
+                        lbFileList.Items.Clear();
+                        foreach (string filename in xamlNameList)
+                            lbFileList.Items.Add(filename);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+
+        }
+
+        /// <summary>
+        /// 將多個xml轉成單一Excel
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void btnXamlToExcel(object sender, RoutedEventArgs e)
+        {
+            //contain file path
+            string getXmlFullPath;
+            string getXmlName;
+            DataTable firstDt = new DataTable();
+            DataTable tempDt = new DataTable();
+            DataColumn dc;
+            //Create first Column start
+
+
+            #region Add all Column to tempDt
+            dc = new DataColumn();
+            dc.ColumnName = "Key";
+            tempDt.Columns.Add(dc);
+            //End
+
+            if (lbFileList.Items.Count > 0)
+            {
+                for (int i = 0; i < lbFileList.Items.Count; i++)
+                {
+                    getXmlFullPath = lbFileList.Items[i].ToString();
+                    getXmlName = System.IO.Path.GetFileNameWithoutExtension(getXmlFullPath);
+                    dc = new DataColumn();
+                    dc.ColumnName = getXmlName;
+                    tempDt.Columns.Add(dc);
+                }
+            }
+            #endregion
+
+            if (lbFileList.Items.Count > 0)
+            {
+                for (int i = 0; i < lbFileList.Items.Count; i++)
+                {
+                    getXmlFullPath = lbFileList.Items[i].ToString();
+                    getXmlName = System.IO.Path.GetFileNameWithoutExtension(getXmlFullPath);
+                    //first time 
+                    if (string.IsNullOrEmpty(firstDt.ToString()))
+                    {
+                        firstDt = XmlToDataTable(getXmlFullPath);
+                        firstDt.Columns["String_Text"].ColumnName = getXmlName;
+                        firstDt.PrimaryKey = new DataColumn[] { firstDt.Columns[0] };
+                        firstDt.AcceptChanges();
+
+                    }
+                    else
+                    {
+                        getXmlFullPath = lbFileList.Items[i].ToString();
+                        getXmlName = System.IO.Path.GetFileNameWithoutExtension(getXmlFullPath);
+                        DataTable needMergeDt = XmlToDataTable(getXmlFullPath);
+                        needMergeDt.Columns["String_Text"].ColumnName = getXmlName;
+                        needMergeDt.PrimaryKey = new DataColumn[] { needMergeDt.Columns[0] };
+
+
+                        for (int j = 1; j < needMergeDt.Columns.Count; j++)
+                        {
+                            dc = new DataColumn();
+                            dc.ColumnName = needMergeDt.Columns[j].ColumnName.ToString();
+                            tempDt.Columns.Add(dc);
+                        }
+                        tempDt.AcceptChanges();
+
+                        //tempDt.Columns.Add(getXmlName);
+
+                        tempDt.Merge(needMergeDt, false, MissingSchemaAction.Add);
+
+                        //firstDt.Merge(needMergeDt, false);
+                        var AA = firstDt;
+                    }
+
+                }
+            }
+        }
+
+        /// <summary>
+        /// Xml Convert to DataTable
+        /// </summary>
+        /// <param name="XmlName"></param>
+        /// <returns>DataTable</returns>
+        public DataTable XmlToDataTable(string XmlName)
+        {
+            DataTable dt;
+            DataSet ds = new DataSet();
+            try
+            {
+                #region 20160701新的讀檔方式
+                FileStream fsReadXml = new FileStream(XmlName, FileMode.Open);
+                XmlTextReader xmlReader = new XmlTextReader(fsReadXml);
+                ds.ReadXml(xmlReader);
+                xmlReader.Close();
+                #endregion
+
+                #region  原本的讀取方法，find bug
+                //XDocument XmlContent = XDocument.Load(XmlName);
+                //XmlReader Xmlreader = XmlReader.Create(new System.IO.StringReader(XmlContent.ToString()));
+                //ds.ReadXml(Xmlreader);
+                #endregion
+
+                dt = ds.Tables[0];
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("DataTable XmlToDataTable error=" + ex.ToString());
+                throw;
+            }
+
+            return dt;
+
+        }
+
+        /// <summary>
+        /// convert to xml or string
+        /// </summary>
+        /// <param name="content"></param>
+        /// <returns></returns>
+        //public static string convertToXML(string inputContent)
+        //{
+        //    //Root Dictionary
+        //    Dictionary<string, string> setDict = new Dictionary<string, string>();
+        //    string setDictKey;
+        //    string setDictValue;
+        //    string result = "";
+        //    string ContentWordHead = "<sys:String x:Key=";
+        //    string ContentWordBottom = "</sys:String>";
+        //    string EndWord = "</ResourceDictionary>";
+        //    //DataTable dt = new DataTable();
+
+        //    if (!string.IsNullOrEmpty(inputContent))
+        //    {
+        //        result = inputContent.Replace(ContentWordHead, "").Replace(ContentWordBottom, ">").Replace(@"""", "").Replace(EndWord, "");
+        //        string[] FirstTag = result.Split('>');
+        //        string StartWord = FirstTag[0];
+        //        result = result.Replace(StartWord + ">", "");
+        //        //result 拿掉字串後
+        //        string[] dividedArray = result.Split('>');
+        //        dividedArray = dividedArray.Where((val, idx) => idx != dividedArray.Count() - 1).ToArray(); ;
+        //        int dividedCount = dividedArray.Count();
+        //        //一筆key,一筆Value，轉換完為偶數才對
+        //        if (dividedCount % 2 == 0)
+        //        {
+        //            for (int i = 0; i < dividedCount; i++)
+        //            {
+        //                if (i == 0)
+        //                {
+        //                    var aa = dividedArray[i].Replace("\r\n ", "").Trim();
+        //                }
+        //                if (i % 2 != 0)
+        //                {
+        //                    setDictKey = dividedArray[i];
+
+        //                }
+
+        //                //setDict.Add(dividedArray[i],);
+        //            }
+        //        }
+
+        //    }
+        //    return result;
+        //}
+
+        #endregion
+    }
+}
