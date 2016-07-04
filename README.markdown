@@ -1,5 +1,5 @@
 ﻿fileName: WPF_XmlToExcel 
-此工具非一般使用Join table處理table 資料，而是使用更好維護的寫法，簡潔快速
+目前只能使用XAML轉成Excel,XML還有問題
 
 Features 1:Excel To XML  
 Directions:Single Excel Export multiple XML
