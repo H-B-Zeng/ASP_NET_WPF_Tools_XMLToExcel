@@ -14,8 +14,8 @@ Test File；測試工具的檔案 XML and Excel
 
 version 1.0.1  
 Features 2:XML To Excel  
-1.測試資料:XmlData.xml, XmlData.xlsx 
-2.新增可將xml轉成excel，XmlData.xml >> XmlData.xlsx  
+1.測試資料:XmlData.xml, XmlData.xlsx  
+2.新增功能:可將xml轉成excel，XmlData.xml >> XmlData.xlsx  
   轉換條件:因為各種xml 或xaml 格式不同，此轉換器只限於原始Excel資料像 dataTable  
   如下圖的XML(Excel)才能轉換，XmlData.xml >> XmlData.xlsx 	 
 
