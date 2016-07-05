@@ -1,9 +1,0 @@
-﻿using System;
-
-namespace apexTW.wpf.xmlToExcelSerivce
-{
-    public class XmlToExcelSerivce
-    {
-        
-    }
-}
