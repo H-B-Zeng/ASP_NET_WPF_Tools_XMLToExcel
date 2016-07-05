@@ -1,5 +1,6 @@
-﻿fileName: WPF_XmlToExcel  
-目前只能使用XAML轉成Excel,XML還有問題
+﻿FileName: WPF_XMLToExcel  
+參考來源:
+https://support.microsoft.com/en-us/kb/307548
 
 Features 1:Excel To XML  
 Directions:Single Excel Export multiple XML
@@ -8,6 +9,7 @@ Features 2:XML To Excel
 Directions:multiple XML Export Single Excel
 
 Test File；測試工具的檔案 XML and Excel
+---------------------------------------
 
 version 1.0.1  
 Features 2:XML To Excel  
@@ -22,7 +24,7 @@ Features 2:XML To Excel
 |              |                  |      |   |   |
 |              |                  |      |   |   |
 
-
+---------------------------------------
 version 1.0.0  
 Features 2:XML To Excel  
 1.多個XML:動態將多個xml，Merge Column, 彙整成單一Excel，重複欄位不覆蓋  
