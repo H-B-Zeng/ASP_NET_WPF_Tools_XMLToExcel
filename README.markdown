@@ -12,7 +12,7 @@ Test File；測試檔案 XML and Excel
 
 ---------------------------------------
 
-###version 1.0.1  
+version 1.0.1  
 Features 2:XML To Excel  
 1.測試資料:XmlData.xml, XmlData.xlsx   
 2.新增功能:可將xml轉成excel, XmlData.xml =>> XmlData.xlsx  
