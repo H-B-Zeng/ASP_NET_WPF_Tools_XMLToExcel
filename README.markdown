@@ -20,11 +20,13 @@ Features 2:XML To Excel
   如下圖的XML(Excel)才能轉換
 
 Excel format
+
 | name         | street           | tel  |   |   |
 |--------------|------------------|------|---|---|
 | Joe   Tester | Baker   street 5 | 09xx |   |   |
 |              |                  |      |   |   |
 |              |                  |      |   |   |
+
 
 XML Excel format   
 ``` 
