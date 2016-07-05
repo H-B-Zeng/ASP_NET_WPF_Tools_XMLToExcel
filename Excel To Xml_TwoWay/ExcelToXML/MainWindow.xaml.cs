@@ -34,8 +34,6 @@ namespace ExcelToXML
             InitializeComponent();
         }
 
-
-
         //選擇Excel file
         private void Button_Click_1(object sender, RoutedEventArgs e)
         {
@@ -217,7 +215,7 @@ namespace ExcelToXML
         {
             OpenFileDialog chrooseFileDialog = new OpenFileDialog();
             chrooseFileDialog.DefaultExt = ".xaml";
-            chrooseFileDialog.Filter = ".xaml|*.xaml";
+            chrooseFileDialog.Filter = "XML files(.xaml; .xml)|*.xaml; *.xml";
             chrooseFileDialog.Multiselect = true;
             chrooseFileDialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
             Nullable<bool> result = chrooseFileDialog.ShowDialog();
@@ -269,13 +267,26 @@ namespace ExcelToXML
             //contain path and Name
             string getXmlFullPath;
             string getXmlName;
+            string errorMsg = string.Empty;
+            bool exportSwitch = true;
             DataTable FirstDt = new DataTable();
             DataTable TempDt = new DataTable();
-            string errorMsg = string.Empty;
 
             try
             {
-                if (lbFileList.Items.Count > 0)
+                //還沒選檔案
+                if (lbFileList.Items.Count == 0)
+                {
+                    exportSwitch = false;
+                    MessageBox.Show("Please Choose XML File", "XML Info");
+                }
+                else if (string.IsNullOrEmpty(txtExcelSavePath.Text)) //還未設定存檔路徑
+                {
+                    exportSwitch = false;
+                    MessageBox.Show("Please check export excel path", "Info");
+                }
+
+                if (lbFileList.Items.Count > 0 && exportSwitch)
                 {
                     errorMsg = VerificationXMLFormat(lbFileList.Items.Cast<String>().ToList());
                     if (string.IsNullOrEmpty(errorMsg))
@@ -287,7 +298,10 @@ namespace ExcelToXML
                             if (!string.IsNullOrEmpty(getXmlFullPath))
                             {
                                 FirstDt = XmlToDataTable(getXmlFullPath);
-                                FirstDt.Columns["String_Text"].ColumnName = getXmlName;
+                                if (FirstDt.Columns.Contains("String_Text"))
+                                {
+                                    FirstDt.Columns["String_Text"].ColumnName = getXmlName;
+                                }
                                 FirstDt.PrimaryKey = new DataColumn[] { FirstDt.Columns[0] };
                                 FirstDt.AcceptChanges();
                                 UpdateTableColumns(TempDt, FirstDt);
@@ -312,10 +326,6 @@ namespace ExcelToXML
                         MessageBox.Show("please,Check Xml format \r\n\r\n File Name:" + errorMsg, "XML Info");
                     }
 
-                }
-                else
-                {
-                    MessageBox.Show("Please Choose XML File", "XML Info");
                 }
             }
             catch (Exception ex)
@@ -497,7 +507,6 @@ namespace ExcelToXML
 
             return result;
         }
-
 
         public class resultMsg
         {
