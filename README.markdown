@@ -28,7 +28,7 @@ Excel format
 |              |                  |      |   |   |
 
 
-XML Excel format   
+XML format   
 ``` 
 <?xml version="1.0" encoding="UTF-8"?>
 <addresses xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
