@@ -9,14 +9,14 @@ Features 2:XML To Excel
 Directions:multiple XML Export Single Excel
 
 ---
-version 1.0.2
-此次新增可以測試檔案及免安裝執行檔
+version 1.0.2   
+此次新增可以測試檔案及免安裝執行檔  
 Test Data XAML:multiple Xaml Export Single Excel  
 Test Data XML :multiple XML Export Single Excel  
   
 免安裝執行檔
-Tools_Multi-language_Xaml To Excel.zip  
-
+Free Setup Can Use\Tools_Multi-language_Xaml To Excel.zip  
+  
 ---
 version 1.0.1  
 Features 2:XML To Excel  
