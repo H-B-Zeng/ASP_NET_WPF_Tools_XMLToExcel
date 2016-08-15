@@ -10,11 +10,11 @@ Directions:multiple XML Export Single Excel
 
 ---
 version 1.0.2   
-此次新增可以測試檔案及免安裝執行檔  
+此次新增測試檔案及免安裝執行檔  
 Test Data XAML:multiple Xaml Export Single Excel  
 Test Data XML :multiple XML Export Single Excel  
   
-免安裝執行檔
+免安裝執行檔  
 Free Setup Can Use\Tools_Multi-language_Xaml To Excel.zip  
   
 ---
