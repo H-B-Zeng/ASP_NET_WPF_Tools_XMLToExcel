@@ -9,7 +9,7 @@ Features 2:XML To Excel
 Directions:multiple XML Export Single Excel  
 
 ---
-version End
+version End  
 市面上沒有多個XML轉成單一資料Excel工具，如需此工具請聯絡本人，謝謝。
 
 ---
