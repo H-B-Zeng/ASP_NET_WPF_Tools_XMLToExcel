@@ -9,8 +9,9 @@ Features 2:XML To Excel
 Directions:multiple XML Export Single Excel  
 
 ---
-version End  
-市面上沒有多個XML轉成單一資料Excel工具，如需此工具請聯絡本人，謝謝。
+version 1.0.3  
+Free Setup Can Use 免安裝執行檔及說明  
+Test Data XML 測試用的XML檔案  
 
 ---
 version 1.0.2   
